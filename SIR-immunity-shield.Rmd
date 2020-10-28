@@ -1,0 +1,205 @@
+---
+title: "SIR immunity shield"
+output: html_notebook
+---
+
+
+This R Markdown will recreate the SIR immunity shield model presented by Weitz et al., 2020. (You can access the article here.)[https://www-nature-com/articles/s41591-020-0895-3/]
+
+
+The original code was produced in MATLAB and can be viewed on the team's github. I recreated the model in R for an infectious disease midterm and am providing the code below!
+
+```{r sir model creation}
+## create empty list for immmune data to be pasted
+total_s = as.list(c(1:30))
+## base code is from lecture 1 scripts - sir_desolve.R - by Dr. Max Lau at Emory
+require(deSolve)
+
+## define the model ##
+sir = function(t, y, parms) {
+  # y is a list. each element is a vector storing values of a state variable over time
+  S = y[1]
+  I = y[2]
+  R = y[3]
+  # parms is a list storing parameter values
+  beta = parms["beta"]
+  gamma = parms["gamma"]
+  N = parms["N"]
+  alpha = parms["alpha"]
+  # Define ode
+  dS = -beta * S * I /(1 + alpha * R)
+  dI = beta * S * I/(1+ alpha * R) - (gamma * I)
+  dR = gamma * I
+  res = c(dS, dI, dR)
+  # Return list of the state variable values
+  list(res)
+}
+```
+
+The above is the model function. The standard SIR formulas have been adapted to reflect those in formula one of the journal article (i.e. replace $N$ with $1 + \alpha R$ in the $dS$ and $dI$ equations).
+
+```{r set initial parameters}
+## set parameters and initial conditions ##
+times = seq(0, 30, by = 1)
+parms = c(N = 1000, beta = 0.25, gamma = 0.25, alpha=0) 
+start = c(S = 999, I = 1, R = 0) # note that S + I + R = N
+```
+
+
+This model is looking at change over 30 days. The transmission rte $\beta$ is 0.25, and recovery rate $\gamma$ is 0.25, In the inital model, alpha is zero. By doing this, we can compare the "normal" homogenous mixing SIR model to the SIR model with $\alpha$ built in. For each run, only the alpha value is being changed per run.
+
+```{r}
+## perform numerical integration i.e. run the model ##
+out=ode(y=start, times=times, func=sir, parms= parms)
+## show and plot model outputs ##
+out=as.data.frame(out)
+total_s$alpha_0 = out$I
+
+ggplot(out, aes(x = time)) +
+  geom_line(aes(y=S,colour="Susceptible"))+
+  geom_line(aes(y=I,colour="Infected"))+
+  geom_line(aes(y=R,colour="Recovered"))+
+  labs(x="Time (days)", y = "N", title= "Alpha = 0; stochastic model") +
+  theme(legend.justification=c(1,0), legend.position=c(1,0.5))+
+  theme(legend.title=element_text(size=12,face="bold"),
+        legend.background = element_rect(fill='#FFFFFF',
+        size=0.5,linetype="solid"),
+        legend.text=element_text(size=10),
+        legend.key=element_rect(colour="#FFFFFF",
+        fill='#C2C2C2',
+        size=0.25,
+        linetype="solid"))+
+  scale_colour_manual("Legend",
+                        breaks=c("Susceptible","Infected","Recovered"),
+                        values=c("blue","darkred","black"))
+
+####################################
+parms = c(N = 1000, beta = 0.25, gamma = 0.25, alpha=4) 
+## perform numerical integration i.e. run the model ##
+out=ode(y=start, times=times, func=sir, parms= parms)
+## show and plot model outputs ##
+out=as.data.frame(out)
+total_s$alpha_4 = out$I
+
+ggplot(out, aes(x = time)) +
+  geom_line(aes(y=S,colour="Susceptible"))+
+  geom_line(aes(y=I,colour="Infected"))+
+  geom_line(aes(y=R,colour="Recovered"))+
+  labs(x="Time (days)", y = "N", title= "Alpha = 4") +
+  theme(legend.justification=c(1,0), legend.position=c(1,0.5))+
+  theme(legend.title=element_text(size=12,face="bold"),
+        legend.background = element_rect(fill='#FFFFFF',
+        size=0.5,linetype="solid"),
+        legend.text=element_text(size=10),
+        legend.key=element_rect(colour="#FFFFFF",
+        fill='#C2C2C2',
+        size=0.25,
+        linetype="solid"))+
+  scale_colour_manual("Legend",
+                        breaks=c("Susceptible","Infected","Recovered"),
+                        values=c("blue","darkred","black"))
+
+####################################
+parms = c(N = 1000, beta = 0.25, gamma = 0.25, alpha=8) 
+## perform numerical integration i.e. run the model ##
+out=ode(y=start, times=times, func=sir, parms= parms)
+## show and plot model outputs ##
+out=as.data.frame(out)
+total_s$alpha_8 = out$I
+
+ggplot(out, aes(x = time)) +
+  geom_line(aes(y=S,colour="Susceptible"))+
+  geom_line(aes(y=I,colour="Infected"))+
+  geom_line(aes(y=R,colour="Recovered"))+
+  labs(x="Time (days)", y = "N", title= "Alpha = 8") +
+  theme(legend.justification=c(1,0), legend.position=c(1,0.5))+
+  theme(legend.title=element_text(size=12,face="bold"),
+        legend.background = element_rect(fill='#FFFFFF',
+        size=0.5,linetype="solid"),
+        legend.text=element_text(size=10),
+        legend.key=element_rect(colour="#FFFFFF",
+        fill='#C2C2C2',
+        size=0.25,
+        linetype="solid"))+
+  scale_colour_manual("Legend",
+                        breaks=c("Susceptible","Infected","Recovered"),
+                        values=c("blue","darkred","black"))
+
+####################################
+parms = c(N = 1000, beta = 0.25, gamma = 0.25, alpha=12) 
+## perform numerical integration i.e. run the model ##
+out=ode(y=start, times=times, func=sir, parms= parms)
+## show and plot model outputs ##
+out=as.data.frame(out)
+total_s$alpha_12 = out$I
+
+ggplot(out, aes(x = time)) +
+  geom_line(aes(y=S,colour="Susceptible"))+
+  geom_line(aes(y=I,colour="Infected"))+
+  geom_line(aes(y=R,colour="Recovered"))+
+  labs(x="Time (days)", y = "N", title= "Alpha = 12") +
+  theme(legend.justification=c(1,0), legend.position=c(1,0.5))+
+  theme(legend.title=element_text(size=12,face="bold"),
+        legend.background = element_rect(fill='#FFFFFF',
+        size=0.5,linetype="solid"),
+        legend.text=element_text(size=10),
+        legend.key=element_rect(colour="#FFFFFF",
+        fill='#C2C2C2',
+        size=0.25,
+        linetype="solid"))+
+  scale_colour_manual("Legend",
+                        breaks=c("Susceptible","Infected","Recovered"),
+                        values=c("blue","darkred","black"))
+
+####################################
+parms = c(N = 1000, beta = 0.25, gamma = 0.25, alpha=20) 
+## perform numerical integration i.e. run the model ##
+out=ode(y=start, times=times, func=sir, parms= parms)
+## show and plot model outputs ##
+out=as.data.frame(out)
+total_s$alpha_20 = out$I
+
+ggplot(out, aes(x = time)) +
+  geom_line(aes(y=S,colour="Susceptible"))+
+  geom_line(aes(y=I,colour="Infected"))+
+  geom_line(aes(y=R,colour="Recovered"))+
+  labs(x="Time (days)", y = "N", title= "Alpha = 20") +
+  theme(legend.justification=c(1,0), legend.position=c(1,0.5))+
+  theme(legend.title=element_text(size=12,face="bold"),
+        legend.background = element_rect(fill='#FFFFFF',
+        size=0.5,linetype="solid"),
+        legend.text=element_text(size=10),
+        legend.key=element_rect(colour="#FFFFFF",
+        fill='#C2C2C2',
+        size=0.25,
+        linetype="solid"))+
+  scale_colour_manual("Legend",
+                        breaks=c("Susceptible","Infected","Recovered"),
+                        values=c("blue","darkred","black"))
+
+####################################
+
+ts <- as.data.frame(total_s)
+ts <- ts %>% dplyr::select(alpha_0:alpha_20)
+ts$time <- out$time
+ggplot(ts, aes(x = time)) +
+  geom_line(aes(y=alpha_0,colour="Alpha 0"))+
+  geom_line(aes(y=alpha_4,colour="Alpha 4"))+
+  geom_line(aes(y=alpha_8,colour="Alpha 8"))+
+  geom_line(aes(y=alpha_12,colour="Alpha 12"))+
+  geom_line(aes(y=alpha_20,colour="Alpha 20"))+
+  labs(x="Time (days)", y = "N", title= "Proportion Infected curve for different alpha values, like Figure 2A") +
+  theme(legend.justification=c(1,0), legend.position=c(1,0.5))+
+  theme(legend.title=element_text(size=12,face="bold"),
+        legend.background = element_rect(fill='#FFFFFF',
+        size=0.5,linetype="solid"),
+        legend.text=element_text(size=10),
+        legend.key=element_rect(colour="#FFFFFF",
+        fill='#C2C2C2',
+        size=0.25,
+        linetype="solid")) +
+  scale_colour_manual("Legend",
+                        breaks=c("Alpha 0", "Alpha 4", "Alpha 8", "Alpha 12", "Alpha 20"),
+                        values=c("steelblue","darkblue","blue", "lightskyblue", "lightskyblue1"))
+```
+
